@@ -1,31 +1,19 @@
 ﻿using UnityEngine;
 public class WindBeam : MonoBehaviour
 {
-    [Header("Références")]
     public Transform startPoint;
     public Transform endPoint;
-    public Transform beamObject; // ← référence vers l’objet contenant le collider + renderer
 
-    [Header("Paramètres")]
     public float windWidth = 0.3f;
     public LayerMask obstacleMask;
 
     private LineRenderer line;
-    private BoxCollider boxCollider;
 
     private void Start()
     {
-        if (!beamObject)
-        {
-            Debug.LogError("Assigne 'beamObject' (l’objet qui contient le collider et le LineRenderer).");
-            enabled = false;
-            return;
-        }
+        line = GetComponent<LineRenderer>();
 
-        line = beamObject.GetComponent<LineRenderer>();
-        boxCollider = beamObject.GetComponent<BoxCollider>();
-
-        if (!line || !boxCollider)
+        if (!line)
         {
             Debug.LogError("beamObject doit contenir un LineRenderer et un BoxCollider !");
             enabled = false;
@@ -35,7 +23,6 @@ public class WindBeam : MonoBehaviour
         line.positionCount = 2;
         line.startWidth = windWidth;
         line.endWidth = windWidth;
-        boxCollider.isTrigger = true;
     }
 
     private void Update()
@@ -51,7 +38,7 @@ public class WindBeam : MonoBehaviour
         float maxDistance = Vector3.Distance(start, end);
 
         // Raycast
-        if (Physics.Raycast(start, direction, out RaycastHit hit, maxDistance, obstacleMask, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(start, direction, out RaycastHit hit, maxDistance))
         {
             end = hit.point;
 
@@ -59,7 +46,7 @@ public class WindBeam : MonoBehaviour
 
             if (player.CompareTag("Player"))
             {
-                player.GetComponent<PlayerSize>().ShrinkFast();
+                player.GetComponent<PlayerInteraction>().Respawn();
             }
         }
 
@@ -68,14 +55,6 @@ public class WindBeam : MonoBehaviour
         // MAJ visuel
         line.SetPosition(0, start);
         line.SetPosition(1, end);
-
-        // Aligne uniquement beamObject (pas tout le vent)
-        beamObject.position = start;
-        beamObject.rotation = Quaternion.LookRotation(direction, Vector3.up);
-
-        // Ajuste le collider
-        boxCollider.size = new Vector3(windWidth, windWidth, currentDistance);
-        boxCollider.center = new Vector3(0, 0, currentDistance / 2f);
     }
 
     private void OnDrawGizmos()

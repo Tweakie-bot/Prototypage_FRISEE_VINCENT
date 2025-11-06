@@ -1,20 +1,25 @@
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerInteraction : MonoBehaviour
 {
     [SerializeField] private GameObject Heal;
     [SerializeField] private Transform respawn;
+    [SerializeField] private Image alpha;
 
     private PlayerSize playerSize;
     private Bougie BougieScript;
+    private PlayerController playerController;
     void Start()
     {
         playerSize = gameObject.GetComponent<PlayerSize>();
         BougieScript = Heal.GetComponentInParent<Bougie>();
+        playerController = gameObject.GetComponent<PlayerController>();
     }
 
     public void OnTriggerEnter(Collider other)
@@ -32,6 +37,7 @@ public class PlayerInteraction : MonoBehaviour
             {
                 BougieScript.SetLighted();
                 respawn.position = other.transform.position;
+                Debug.Log($"New respawn position {respawn.position}");
             }
 
             playerSize.SetIsShrinking(false);
@@ -101,8 +107,19 @@ public class PlayerInteraction : MonoBehaviour
 
     public void Respawn()
     {
-        gameObject.transform.position = respawn.position;
+        StartCoroutine(RespawnEffect());
+
+        playerController.CanUpdateCount = 10;
+        //playerController.SetCanUpdate(false);
+
+        Debug.Log($"Respawn in Player Interaction {respawn.position}");
+
+        transform.position = respawn.position;
+
+        print(gameObject.name + " " +  transform.position);
+
         playerSize.ResetSize();
+
     }
 
     public Transform GetRespawn()
@@ -111,5 +128,29 @@ public class PlayerInteraction : MonoBehaviour
     }
     void Update()
     {
+
+    }
+
+    IEnumerator RespawnEffect()
+    {
+        Color color_start = Color.black;
+        color_start.a = 1f;
+        Color color_end = Color.black;
+        color_end.a = 0f;
+
+        float t = 0f;
+
+        alpha.color = color_start;
+        while (t < 4)
+        {
+            t += Time.deltaTime;
+
+            float k = t / 2;
+
+            alpha.color = Color.Lerp(color_start, color_end, k);
+
+            yield return null;
+        }
+        alpha.color = color_end;
     }
 }

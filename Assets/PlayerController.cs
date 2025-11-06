@@ -13,27 +13,36 @@ public class PlayerController : MonoBehaviour
     private Vector2 moveInput;
     private Vector3 velocity;
 
+    public int CanUpdateCount = 0;
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
     }
 
-    void Update()
+    void FixedUpdate()
     {
-        // Convertit l'input en mouvement relatif à la caméra
-        Vector3 camForward = main.transform.forward;
-        camForward.y = 0f;
-        Vector3 camRight = main.transform.right;
-        camRight.y = 0f;
+        if (CanUpdateCount > 0)
+        {
+            CanUpdateCount--;
+        }
+        else
+        {
+            // Convertit l'input en mouvement relatif à la caméra
+            Vector3 camForward = main.transform.forward;
+            camForward.y = 0f;
+            Vector3 camRight = main.transform.right;
+            camRight.y = 0f;
 
-        Vector3 move = camForward * moveInput.y + camRight * moveInput.x;
-        if (move.magnitude > 1f) move.Normalize();
+            Vector3 move = camForward * moveInput.y + camRight * moveInput.x;
+            if (move.magnitude > 1f) move.Normalize();
 
-        controller.Move(move * moveSpeed * Time.deltaTime);
+            controller.Move(move * moveSpeed * Time.deltaTime);
 
-        // Applique la gravité
-        velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
+            // Applique la gravité
+            velocity.y += gravity * Time.deltaTime;
+            controller.Move(velocity * Time.deltaTime);
+        }
     }
 
     // Input System : appelé automatiquement par le Player Input component
@@ -41,5 +50,10 @@ public class PlayerController : MonoBehaviour
     {
         moveInput = context.ReadValue<Vector2>();
     }
+
+    //public void SetCanUpdate(bool bool_value)
+    //{
+    //    CanUpdate = bool_value;
+    //}
 }
 
