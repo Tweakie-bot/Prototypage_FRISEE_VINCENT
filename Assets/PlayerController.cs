@@ -4,9 +4,9 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
-    [Header("Movement")]
     public float moveSpeed = 5f;
     public float gravity = -9.81f;
+    public float jumpHeight = 2f;
     public Camera main;
 
     private CharacterController controller;
@@ -28,7 +28,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            // Convertit l'input en mouvement relatif à la caméra
+            // --- Mouvement relatif à la caméra ---
             Vector3 camForward = main.transform.forward;
             camForward.y = 0f;
             Vector3 camRight = main.transform.right;
@@ -39,21 +39,31 @@ public class PlayerController : MonoBehaviour
 
             controller.Move(move * moveSpeed * Time.deltaTime);
 
-            // Applique la gravité
+            // --- Gravité & saut ---
+            if (controller.isGrounded && velocity.y < 0)
+            {
+                velocity.y = -2f; // Empêche l'accumulation de gravité au sol
+            }
+
             velocity.y += gravity * Time.deltaTime;
             controller.Move(velocity * Time.deltaTime);
         }
     }
 
-    // Input System : appelé automatiquement par le Player Input component
+    // --- Appelé par l'Input System ---
     public void OnMove(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
     }
 
-    //public void SetCanUpdate(bool bool_value)
-    //{
-    //    CanUpdate = bool_value;
-    //}
+    // --- Saut ---
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        if (context.performed && controller.isGrounded)
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
+    }
 }
+
 
