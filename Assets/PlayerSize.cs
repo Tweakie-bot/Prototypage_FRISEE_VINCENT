@@ -5,31 +5,29 @@ using UnityEngine;
 
 public class PlayerSize : MonoBehaviour
 {
-    [SerializeField] private GameObject capsule;
     [SerializeField] private float MinSize;
-    private Vector3 OriginalSize;
-    private bool isShrinking = true;
+    [SerializeField] private float ShrinkRate;
 
-    private bool GameOver;
+    private Vector3 OriginalSize;
+
+    private bool isShrinking = true;
 
     private PlayerInteraction playerInteraction;
     void Start()
     {
-        playerInteraction = GetComponent<PlayerInteraction>();
+        playerInteraction = gameObject.GetComponent<PlayerInteraction>();
 
-        OriginalSize = capsule.transform.localScale;
+        OriginalSize = transform.localScale;
 
-        InvokeRepeating("Shrink", 2, 1);
+        InvokeRepeating("Shrink", 5, 2);
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if(capsule.transform.localScale.y < MinSize)
+        if(transform.localScale.y < MinSize)
         {
-            GameOver = true;
             playerInteraction.Respawn();
-            GameOver = false;
+            Debug.Log("Respawn at " + playerInteraction.GetRespawn());
         }
     }
 
@@ -37,27 +35,26 @@ public class PlayerSize : MonoBehaviour
     {
         if (isShrinking == true)
         {
-            Vector3 shrink = new Vector3(0.1f, 0.1f, 0.1f);
-            capsule.transform.localScale -= shrink;
+            Vector3 shrink = new Vector3(ShrinkRate, ShrinkRate, ShrinkRate);
+            transform.localScale -= shrink;
+        }
+    }
+
+    public void ShrinkFast()
+    {
+        if (isShrinking == true)
+        {
+            Vector3 shrink = new Vector3(ShrinkRate * 2, ShrinkRate * 2, ShrinkRate * 2);
+            transform.localScale -= shrink;
         }
     }
 
     public void GrowBack()
     {
-        if (capsule.transform.localScale != OriginalSize)
+        if (transform.localScale.y < OriginalSize.y)
         {
-            capsule.transform.localScale += new Vector3(0.1f, 0.1f, 0.1f);
+            transform.localScale += new Vector3(ShrinkRate, ShrinkRate, ShrinkRate);
         }
-    }
-
-    public void SetGameOver(bool gameOver)
-    {
-        GameOver = gameOver;
-    }
-
-    public bool GetGameOver()
-    {
-        return GameOver;
     }
 
     public void SetIsShrinking(bool boolean)
@@ -67,6 +64,6 @@ public class PlayerSize : MonoBehaviour
 
     public void ResetSize()
     {
-        capsule.transform.localScale = OriginalSize;
+        transform.localScale = OriginalSize;
     }
 }

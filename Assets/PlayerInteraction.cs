@@ -2,24 +2,19 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class PlayerInteraction : MonoBehaviour
 {
-    [SerializeField] private GameObject bougie;
-    [SerializeField] private GameObject canvas;
+    [SerializeField] private GameObject Heal;
+    [SerializeField] private Transform respawn;
 
     private PlayerSize playerSize;
     private Bougie BougieScript;
-    private UIManager uiManager;
-
-    private Vector3 respawn;
     void Start()
     {
-        playerSize = gameObject.GetComponentInParent<PlayerSize>();
-        BougieScript = bougie.GetComponent<Bougie>();
-        uiManager = canvas.GetComponent<UIManager>();
-
-        respawn = transform.position;
+        playerSize = gameObject.GetComponent<PlayerSize>();
+        BougieScript = Heal.GetComponentInParent<Bougie>();
     }
 
     public void OnTriggerEnter(Collider other)
@@ -36,10 +31,29 @@ public class PlayerInteraction : MonoBehaviour
             if (BougieScript.GetIsLighted() == false)
             {
                 BougieScript.SetLighted();
-                respawn = other.transform.position;
+                respawn.position = other.transform.position;
             }
 
             playerSize.SetIsShrinking(false);
+        }
+
+        if (other.CompareTag("Brasier")) 
+        {
+            playerSize.SetIsShrinking(false);
+            SceneManager.LoadScene("New Scene");
+        }
+
+        if (other.CompareTag("Obstacle"))
+        {
+            if (other.GetComponentInParent<Obstacle>() != null)
+            {
+                Obstacle obstacle = other.GetComponentInParent<Obstacle>();
+
+                if (obstacle.GetIsBurning() == false)
+                {
+                    obstacle.SetBurning();
+                }
+            }
         }
     }
     public void OnTriggerStay(Collider other)
@@ -61,6 +75,16 @@ public class PlayerInteraction : MonoBehaviour
                 }
             }
         }
+
+        if (other.CompareTag("Obstacle"))
+        {
+            Obstacle obstacle = other.GetComponentInParent<Obstacle>();
+
+            if (obstacle.GetIsBurning() == true)
+            {
+                playerSize.GrowBack();
+            }
+        }
     }
 
     public void OnTriggerExit(Collider other)
@@ -69,16 +93,23 @@ public class PlayerInteraction : MonoBehaviour
         {
             playerSize.SetIsShrinking(true);
         }
+        if (other.CompareTag("Obstacle"))
+        {
+            playerSize.SetIsShrinking(true);
+        }
     }
 
     public void Respawn()
     {
-        transform.position = respawn;
+        gameObject.transform.position = respawn.position;
         playerSize.ResetSize();
-        playerSize.SetIsShrinking(true);
+    }
+
+    public Transform GetRespawn()
+    {
+        return respawn;
     }
     void Update()
     {
-        
     }
 }

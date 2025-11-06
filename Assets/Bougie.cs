@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class Bougie : MonoBehaviour
 {
-    [SerializeField] private GameObject bougie;
+    [SerializeField] GameObject bougieHead;
+    [SerializeField] GameObject effect;
     private bool IsLighted;
     void Start()
     {
@@ -18,7 +19,8 @@ public class Bougie : MonoBehaviour
     public void SetLighted()
     {
         IsLighted = true;
-        bougie.GetComponent<Renderer>().material.color = Color.red;
+        bougieHead.GetComponent<Renderer>().material.color = Color.red;
+        effect.SetActive(true);
     }
 
     public bool GetIsLighted()

@@ -5,11 +5,14 @@ TagManager:
   serializedVersion: 3
   tags:
   - Bougie
+  - Brasier
+  - Obstacle
+  - Wind
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Obstacle
   - Water
   - UI
   - 
