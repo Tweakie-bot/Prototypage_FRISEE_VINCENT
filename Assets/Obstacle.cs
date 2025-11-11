@@ -5,8 +5,6 @@ public class Obstacle : MonoBehaviour
     [SerializeField] private GameObject position;
 
     private bool isBurning;
-
-    private int health = 100;
     void Start()
     {
         
@@ -15,10 +13,7 @@ public class Obstacle : MonoBehaviour
     // Update is called once per frame
     void Update()
     { 
-        if (health < 1)
-        {
-            Destroy(gameObject);
-        }
+
     }
 
     public void SetBurning()
@@ -34,9 +29,5 @@ public class Obstacle : MonoBehaviour
     public bool GetIsBurning()
     {
         return isBurning;
-    }
-    private void DiminishHealth()
-    {
-        health -= 10;
     }
 }

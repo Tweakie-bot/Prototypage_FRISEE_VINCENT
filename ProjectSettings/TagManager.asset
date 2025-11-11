@@ -8,6 +8,7 @@ TagManager:
   - Brasier
   - Obstacle
   - Wind
+  - Ground
   layers:
   - Default
   - TransparentFX
@@ -15,8 +16,8 @@ TagManager:
   - Obstacle
   - Water
   - UI
-  - 
-  - 
+  - Ground
+  - Mur
   - 
   - 
   - 

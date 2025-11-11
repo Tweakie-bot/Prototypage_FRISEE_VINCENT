@@ -1,12 +1,15 @@
 using System.Net.NetworkInformation;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerSize : MonoBehaviour
 {
     [SerializeField] private float MinSize;
     [SerializeField] private float ShrinkRate;
+    [SerializeField] private Text _textMeshPro;
 
     private Vector3 OriginalSize;
 
@@ -29,8 +32,18 @@ public class PlayerSize : MonoBehaviour
             playerInteraction.Respawn();
             Debug.Log("Respawn at " + playerInteraction.GetRespawn());
         }
+        _textMeshPro.text = transform.localScale.y.ToString();
     }
 
+    public void StopShrinking()
+    {
+        isShrinking = false;
+    }
+
+    public void ResumeS()
+    {
+        isShrinking = true;
+    }
     public void Shrink()
     {
         if (isShrinking == true)

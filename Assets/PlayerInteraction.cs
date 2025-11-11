@@ -14,16 +14,16 @@ public class PlayerInteraction : MonoBehaviour
 
     private PlayerSize playerSize;
     private Bougie BougieScript;
-    private PlayerController playerController;
     void Start()
     {
         playerSize = gameObject.GetComponent<PlayerSize>();
         BougieScript = Heal.GetComponentInParent<Bougie>();
-        playerController = gameObject.GetComponent<PlayerController>();
     }
 
     public void OnTriggerEnter(Collider other)
     {
+        Debug.Log($"Collision détectée avec {other.name}, tag = {other.tag}");
+
         if (other.CompareTag("Bougie"))
         {
             BougieScript = other.gameObject.GetComponent<Bougie>();
@@ -41,6 +41,11 @@ public class PlayerInteraction : MonoBehaviour
             }
 
             playerSize.SetIsShrinking(false);
+        }
+
+        if (other.CompareTag("Respawn"))
+        {
+            Respawn();
         }
 
         if (other.CompareTag("Brasier")) 
@@ -108,8 +113,6 @@ public class PlayerInteraction : MonoBehaviour
     public void Respawn()
     {
         StartCoroutine(RespawnEffect());
-
-        playerController.CanUpdateCount = 10;
         //playerController.SetCanUpdate(false);
 
         Debug.Log($"Respawn in Player Interaction {respawn.position}");
