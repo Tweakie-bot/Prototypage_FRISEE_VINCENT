@@ -9,6 +9,8 @@ TagManager:
   - Obstacle
   - Wind
   - Ground
+  - BurnIt
+  - Flame
   layers:
   - Default
   - TransparentFX

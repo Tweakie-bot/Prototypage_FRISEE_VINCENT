@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -8,23 +9,44 @@ using UnityEngine.UI;
 
 public class PlayerInteraction : MonoBehaviour
 {
-    [SerializeField] private GameObject Heal;
     [SerializeField] private Transform respawn;
     [SerializeField] private Image alpha;
 
+    private Vector3 FirstRespawn;
     private PlayerSize playerSize;
     private Bougie BougieScript;
+
+    private List<GameObject> destroyedObject;
+
+    private List<GameObject> _flames;
+
+    private List<GameObject> saveDestoyedObject;
+
+    public void AddDestroyedObject(GameObject o)
+    {
+        destroyedObject.Add(o);
+    }
     void Start()
     {
         playerSize = gameObject.GetComponent<PlayerSize>();
-        BougieScript = Heal.GetComponentInParent<Bougie>();
+        destroyedObject = new List<GameObject>();
+        saveDestoyedObject = new List<GameObject>();
+        FirstRespawn = new Vector3(respawn.position.x, respawn.position.y, respawn.position.z);
+        _flames = new List<GameObject>();
     }
 
-    public void OnTriggerEnter(Collider other)
+    public void OnCollisionEnter(Collision other)
     {
-        Debug.Log($"Collision détectée avec {other.name}, tag = {other.tag}");
+        if (other.gameObject.CompareTag("Flame"))
+        {
+            playerSize.ResetSize();
 
-        if (other.CompareTag("Bougie"))
+            _flames.Add(other.gameObject);
+
+            other.gameObject.SetActive(false);
+        }
+
+        if (other.gameObject.CompareTag("Bougie"))
         {
             BougieScript = other.gameObject.GetComponent<Bougie>();
 
@@ -37,83 +59,97 @@ public class PlayerInteraction : MonoBehaviour
             {
                 BougieScript.SetLighted();
                 respawn.position = other.transform.position;
-                Debug.Log($"New respawn position {respawn.position}");
+                saveDestoyedObject = destroyedObject;
             }
-
-            playerSize.SetIsShrinking(false);
         }
 
-        if (other.CompareTag("Respawn"))
+        if (other.gameObject.CompareTag("Respawn"))
         {
             Respawn();
         }
 
-        if (other.CompareTag("Brasier")) 
+        if (other.gameObject.CompareTag("Brasier")) 
         {
-            playerSize.SetIsShrinking(false);
             SceneManager.LoadScene("New Scene");
         }
 
-        if (other.CompareTag("Obstacle"))
+        if (other.gameObject.CompareTag("Obstacle") || other.gameObject.CompareTag("BurnIt"))
         {
-            if (other.GetComponentInParent<Obstacle>() != null)
-            {
-                Obstacle obstacle = other.GetComponentInParent<Obstacle>();
+            Burn obstacle;
 
-                if (obstacle.GetIsBurning() == false)
-                {
-                    obstacle.SetBurning();
-                }
-            }
-        }
-    }
-    public void OnTriggerStay(Collider other)
-    {
-        if (other.CompareTag("Bougie"))
-        {
-            BougieScript = other.gameObject.GetComponent<Bougie>();
-
-            if (BougieScript == null)
+            if (other.gameObject.GetComponentInParent<Burn>() == null)
             {
-                BougieScript = other.gameObject.GetComponentInParent<Bougie>();
+                obstacle = other.gameObject.GetComponent<Burn>();
+            } 
+
+            else
+            {
+                obstacle = other.gameObject.GetComponentInParent<Burn>();
             }
 
-            if (BougieScript != null )
+            if (obstacle.GetIsBurning() == false)
             {
-                if (BougieScript.GetIsLighted())
-                {
-                    playerSize.GrowBack();
-                }
+                obstacle.SetBurning();
+                Debug.Log($"{obstacle} {obstacle.GetIsBurning()}");
             }
-        }
-
-        if (other.CompareTag("Obstacle"))
-        {
-            Obstacle obstacle = other.GetComponentInParent<Obstacle>();
-
-            if (obstacle.GetIsBurning() == true)
-            {
-                playerSize.GrowBack();
-            }
-        }
-    }
-
-    public void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Bougie"))
-        {
-            playerSize.SetIsShrinking(true);
-        }
-        if (other.CompareTag("Obstacle"))
-        {
-            playerSize.SetIsShrinking(true);
         }
     }
 
     public void Respawn()
     {
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        Debug.Log("RESPAWN POSITION SET TO : " + respawn.position);
+
+        if (respawn.position == FirstRespawn)
+        {
+            foreach (GameObject destroyed_object in destroyedObject)
+            {
+                destroyed_object.SetActive(true);
+
+                Burn script;
+
+                if (destroyed_object.GetComponentInParent<Burn>() == null)
+                {
+                    script = destroyed_object.GetComponent<Burn>();
+                } else
+                {
+                    script = destroyed_object.GetComponentInParent<Burn>();
+                }
+
+                script.GiveHealthBack();
+            }
+        }
+        foreach (GameObject destroyed_object in destroyedObject)
+        {
+            if (!saveDestoyedObject.Contains(destroyed_object))
+            {
+                destroyed_object.SetActive(true);
+
+                Burn script;
+
+                if (destroyed_object.GetComponentInParent<Burn>() == null)
+                {
+                    script = destroyed_object.GetComponent<Burn>();
+                }
+                else
+                {
+                    script = destroyed_object.GetComponentInParent<Burn>();
+                }
+
+                script.GiveHealthBack();
+            }
+        }
+
+        foreach (GameObject destroyed in _flames)
+        {
+            destroyed.SetActive(true);
+        }
+        _flames.Clear();
+
         StartCoroutine(RespawnEffect());
-        //playerController.SetCanUpdate(false);
 
         Debug.Log($"Respawn in Player Interaction {respawn.position}");
 
@@ -122,6 +158,8 @@ public class PlayerInteraction : MonoBehaviour
         print(gameObject.name + " " +  transform.position);
 
         playerSize.ResetSize();
+
+        Debug.Log("PLAYER POSITION AFTER TELEPORT : " + transform.position);
 
     }
 

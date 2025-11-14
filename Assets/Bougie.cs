@@ -4,6 +4,8 @@ public class Bougie : MonoBehaviour
 {
     [SerializeField] GameObject bougieHead;
     [SerializeField] GameObject effect;
+    [SerializeField] Material _material;
+
     private bool IsLighted;
     void Start()
     {
@@ -19,7 +21,7 @@ public class Bougie : MonoBehaviour
     public void SetLighted()
     {
         IsLighted = true;
-        bougieHead.GetComponent<Renderer>().material.color = Color.red;
+        bougieHead.GetComponent<Renderer>().material = _material;
         effect.SetActive(true);
     }
 

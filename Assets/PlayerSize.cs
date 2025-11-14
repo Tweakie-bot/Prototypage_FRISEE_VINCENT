@@ -9,11 +9,11 @@ public class PlayerSize : MonoBehaviour
 {
     [SerializeField] private float MinSize;
     [SerializeField] private float ShrinkRate;
-    [SerializeField] private Text _textMeshPro;
+    [SerializeField] private TMP_Text _textMeshPro;
+
+    private bool isShrinking;
 
     private Vector3 OriginalSize;
-
-    private bool isShrinking = true;
 
     private PlayerInteraction playerInteraction;
     void Start()
@@ -21,6 +21,8 @@ public class PlayerSize : MonoBehaviour
         playerInteraction = gameObject.GetComponent<PlayerInteraction>();
 
         OriginalSize = transform.localScale;
+
+        isShrinking = true;
 
         InvokeRepeating("Shrink", 5, 2);
     }
@@ -32,47 +34,24 @@ public class PlayerSize : MonoBehaviour
             playerInteraction.Respawn();
             Debug.Log("Respawn at " + playerInteraction.GetRespawn());
         }
-        _textMeshPro.text = transform.localScale.y.ToString();
-    }
-
-    public void StopShrinking()
-    {
-        isShrinking = false;
-    }
-
-    public void ResumeS()
-    {
-        isShrinking = true;
+        _textMeshPro.text = $"VIE : {transform.localScale.y.ToString()}";
     }
     public void Shrink()
     {
-        if (isShrinking == true)
+        if (isShrinking)
         {
             Vector3 shrink = new Vector3(ShrinkRate, ShrinkRate, ShrinkRate);
             transform.localScale -= shrink;
         }
     }
 
-    public void ShrinkFast()
+    public void StopShrinking()
     {
-        if (isShrinking == true)
-        {
-            Vector3 shrink = new Vector3(ShrinkRate * 2, ShrinkRate * 2, ShrinkRate * 2);
-            transform.localScale -= shrink;
-        }
+        isShrinking = false;
     }
-
-    public void GrowBack()
+    public void ResumeS()
     {
-        if (transform.localScale.y < OriginalSize.y)
-        {
-            transform.localScale += new Vector3(ShrinkRate, ShrinkRate, ShrinkRate);
-        }
-    }
-
-    public void SetIsShrinking(bool boolean)
-    {
-        isShrinking = boolean;
+        isShrinking = true;
     }
 
     public void ResetSize()
